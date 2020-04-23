@@ -10,7 +10,14 @@ POST /auc/:id 평균판매가 저장
 GET /auc/:id 아이템 평균판매가 조회
 */
 
-const recentSearch = ctx => {};
+const recentSearch = async ctx => {
+	try {
+		const items = await Auc.find().sort({ _id: -1 }).exec();
+		ctx.body = items;
+	} catch (e) {
+		ctx.throw(500, e);
+	}
+};
 
 const avgSave = async ctx => {
 	// 유효값 검증
@@ -53,7 +60,14 @@ const avgSave = async ctx => {
 	}
 };
 
-const avgList = ctx => {};
+const avgList = async ctx => {
+	try {
+		const prices = await Auc.find({ itemId: ctx.params.id }).exec();
+		ctx.body = prices;
+	} catch (e) {
+		ctx.throw(500, e);
+	}
+};
 
 auc.get("/", recentSearch);
 auc.post("/:id", avgSave);
