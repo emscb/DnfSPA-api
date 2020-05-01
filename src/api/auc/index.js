@@ -5,14 +5,24 @@ import Joi from "joi";
 const auc = new Router();
 
 /*
-GET /auc 최근 검색한 아이템 조회
+GET /auc 가장 많이 검색한 아이템 조회
 POST /auc/:id 평균판매가 저장
 GET /auc/:id 아이템 평균판매가 조회
 */
 
-const recentSearch = async ctx => {
+const freqSearch = async ctx => {
 	try {
-		const items = await Auc.find().sort({ _id: -1 }).exec();
+		const items = await Auc.aggregate([
+			{
+				$group: {
+					_id: "$itemId",
+					"count": {$sum: 1}
+				},
+			},
+			{
+				$count: "all",
+			},
+		]).exec();
 		ctx.body = items;
 	} catch (e) {
 		ctx.throw(500, e);
@@ -69,7 +79,7 @@ const avgList = async ctx => {
 	}
 };
 
-auc.get("/", recentSearch);
+auc.get("/", freqSearch);
 auc.post("/:id", avgSave);
 auc.get("/:id", avgList);
 
