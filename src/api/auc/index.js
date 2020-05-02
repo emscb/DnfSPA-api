@@ -15,12 +15,14 @@ const freqSearch = async ctx => {
 		const items = await Auc.aggregate([
 			{
 				$group: {
-					_id: "$itemId",
-					"count": {$sum: 1}
+					_id: { name: "$itemName", id: "$itemId" },
+					count: { $sum: 1 },
 				},
 			},
 			{
-				$count: "all",
+				$sort: {
+					count: -1,
+				},
 			},
 		]).exec();
 		ctx.body = items;
