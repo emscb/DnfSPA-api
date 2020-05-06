@@ -68,7 +68,7 @@ const avgSave = async ctx => {
 			ctx.throw(500, e);
 		}
 	} else {
-		ctx.body = "Already saved.";
+		ctx.body = "Already exist.";
 	}
 };
 
