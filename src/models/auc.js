@@ -10,4 +10,5 @@ const AucSchema = new Schema({
 });
 
 const Auc = mongoose.model("Auc", AucSchema);
+
 export default Auc;
