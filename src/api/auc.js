@@ -1,5 +1,6 @@
 import Router from "koa-router";
-import Auc from "../../models/auc";
+import Auc from "../models/auc";
+import Config from "../models/config";
 import Joi from "joi";
 
 const auc = new Router();
@@ -81,8 +82,46 @@ const avgList = async ctx => {
 	}
 };
 
+const dbSync = async ctx => {
+	// try {
+	// 	for (let a = 0; a < ctx.request.body.length; a++) {
+	// 		const { date, itemName, itemId, avgPrice } = ctx.request.body[a];
+	// 		const item = new Auc({
+	// 			date,
+	// 			itemName,
+	// 			itemId,
+	// 			avgPrice,
+	// 		});
+	// 		await item.save();
+	// 	}
+	// } catch (e) {
+	// 	ctx.throw(500, e);
+	// }
+
+	const c = new Config({
+		item: "dbsync",
+		content: "2020-05-06",
+	});
+	await c.save();
+	ctx.body = "Saved";
+
+	// Config.update(
+	// 	{
+	// 		item: "dbSync",
+	// 	},
+	// 	{
+	// 		item: "dbSync",
+	// 		content: "2020-05-06",
+	// 	},
+	// 	{
+	// 		upsert: true,
+	// 	}
+	// );
+};
+
 auc.get("/", freqSearch);
 auc.post("/:id", avgSave);
 auc.get("/:id", avgList);
+auc.post("/dbsync", dbSync);
 
 export default auc;
