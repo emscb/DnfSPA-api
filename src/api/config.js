@@ -5,19 +5,16 @@ const config = new Router();
 
 // 전제 설정 검색
 const getConfig = async ctx => {
-	const c = new Config({
-		item: "dbsync",
-		content: "2020-05-06",
-	});
-	await c.save();
-	ctx.body = "Saved";
-
-	// try {
-	// 	const configs = await Config.find().exec();
-	// 	ctx.body = configs;
-	// } catch (e) {
-	// 	ctx.throw(500, e);
-	// }
+	try {
+		const configs = await Config.find().exec();
+		var info = {};
+		for (let a = 0; a < configs.length; a++) {
+			info = { ...info, [configs[a].item]: configs[a].content };
+		}
+		ctx.body = info;
+	} catch (e) {
+		ctx.throw(500, e);
+	}
 };
 
 config.get("/", getConfig);

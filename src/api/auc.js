@@ -83,45 +83,38 @@ const avgList = async ctx => {
 };
 
 const dbSync = async ctx => {
-	// try {
-	// 	for (let a = 0; a < ctx.request.body.length; a++) {
-	// 		const { date, itemName, itemId, avgPrice } = ctx.request.body[a];
-	// 		const item = new Auc({
-	// 			date,
-	// 			itemName,
-	// 			itemId,
-	// 			avgPrice,
-	// 		});
-	// 		await item.save();
-	// 	}
-	// } catch (e) {
-	// 	ctx.throw(500, e);
-	// }
+	console.log(`put received`)
+	const sync_date = ctx.params.id;
+	try {
+		// 검증 단계 추가
+		for (let a = 0; a < ctx.request.body.list.length; a++) {
+			const { date, itemName, itemId, avgPrice } = ctx.request.body.list[a];
+			const item = new Auc({
+				date,
+				itemName,
+				itemId,
+				avgPrice,
+			});
+			await item.save();
+		}
+		ctx.body = "saved"
+	} catch (e) {
+		ctx.throw(500, e);
+	}
 
-	const c = new Config({
-		item: "dbsync",
-		content: "2020-05-06",
-	});
-	await c.save();
-	ctx.body = "Saved";
-
-	// Config.update(
-	// 	{
-	// 		item: "dbSync",
-	// 	},
-	// 	{
-	// 		item: "dbSync",
-	// 		content: "2020-05-06",
-	// 	},
-	// 	{
-	// 		upsert: true,
-	// 	}
-	// );
+	Config.update(
+		{
+			item: "dbsync",
+		},
+		{
+			content: sync_date,
+		}
+	);
 };
 
 auc.get("/", freqSearch);
 auc.post("/:id", avgSave);
 auc.get("/:id", avgList);
-auc.post("/dbsync", dbSync);
+auc.put("/:id", dbSync);
 
 export default auc;
