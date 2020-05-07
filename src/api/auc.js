@@ -32,7 +32,7 @@ const freqSearch = async ctx => {
 					count: -1,
 				},
 			},
-		]).exec();
+		]).limit(5).exec();
 		ctx.body = items;
 	} catch (e) {
 		ctx.throw(500, e);
