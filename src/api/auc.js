@@ -2,6 +2,7 @@ import Router from "koa-router";
 import Auc from "../models/auc";
 import Config from "../models/config";
 import Joi from "joi";
+import logger from "../../logger";
 
 const auc = new Router();
 
