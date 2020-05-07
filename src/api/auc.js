@@ -11,6 +11,13 @@ POST /auc/:id 평균판매가 저장
 GET /auc/:id 아이템 평균판매가 조회
 */
 
+const schema = Joi.object().keys({
+	date: Joi.date().required(),
+	itemName: Joi.string().required(),
+	itemId: Joi.string().required(),
+	avgPrice: Joi.number().required(),
+});
+
 const freqSearch = async ctx => {
 	try {
 		const items = await Auc.aggregate([
@@ -34,13 +41,6 @@ const freqSearch = async ctx => {
 
 const avgSave = async ctx => {
 	// 유효값 검증
-	const schema = Joi.object().keys({
-		date: Joi.date().required(),
-		itemName: Joi.string().required(),
-		itemId: Joi.string().required(),
-		avgPrice: Joi.number().required(),
-	});
-
 	const result = Joi.validate(ctx.request.body, schema);
 	if (result.error) {
 		ctx.status = 400; // Bad request
@@ -83,12 +83,26 @@ const avgList = async ctx => {
 };
 
 const dbSync = async ctx => {
-	console.log(`put received`)
 	const sync_date = ctx.params.id;
+	const itemList = ctx.request.body.list;
+	if (itemList == undefined) {
+		ctx.status = 400;
+		ctx.body = "No data received.";
+	}
+
 	try {
-		// 검증 단계 추가
-		for (let a = 0; a < ctx.request.body.list.length; a++) {
-			const { date, itemName, itemId, avgPrice } = ctx.request.body.list[a];
+		for (let a = 0; a < itemList.length; a++) {
+			const itemObj = JSON.parse(itemList[a]);
+			const { date, itemName, itemId, avgPrice } = itemObj;
+
+			// 데이터 검증
+			const result = Joi.validate({ date, itemName, itemId, avgPrice }, schema);
+			if (result.error) {
+				ctx.status = 400; // Bad request
+				ctx.body = result.error;
+				return;
+			}
+
 			const item = new Auc({
 				date,
 				itemName,
@@ -97,17 +111,18 @@ const dbSync = async ctx => {
 			});
 			await item.save();
 		}
-		ctx.body = "saved"
+		ctx.status = 201;
+		ctx.body = "Saved";
 	} catch (e) {
 		ctx.throw(500, e);
 	}
 
-	Config.update(
+	await Config.updateOne(
 		{
 			item: "dbsync",
 		},
 		{
-			content: sync_date,
+			$set: { content: sync_date },
 		}
 	);
 };
