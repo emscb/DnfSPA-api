@@ -20,6 +20,7 @@ const schema = Joi.object().keys({
 });
 
 const freqSearch = async ctx => {
+	logger.info("최빈 검색 아이템 조회");
 	try {
 		const items = await Auc.aggregate([
 			{
@@ -33,19 +34,28 @@ const freqSearch = async ctx => {
 					count: -1,
 				},
 			},
-		]).limit(5).exec();
+		])
+			.limit(8)
+			.exec();
 		ctx.body = items;
 	} catch (e) {
 		ctx.throw(500, e);
+		logger.error(`최빈 검색 아이템 조회 실패 (500) ${e}`);
 	}
 };
 
 const avgSave = async ctx => {
+	logger.info("평균판매가 저장 요청");
 	// 유효값 검증
 	const result = Joi.validate(ctx.request.body, schema);
 	if (result.error) {
 		ctx.status = 400; // Bad request
 		ctx.body = result.error;
+		logger.error(
+			`${
+				ctx.request.body.itemName == undefined ? "" : ctx.request.body.itemName
+			}평균판매가 저장 실패 (400)`
+		);
 		return;
 	}
 
@@ -66,11 +76,14 @@ const avgSave = async ctx => {
 		try {
 			await auc.save();
 			ctx.body = auc;
+			logger.info(`${itemName} saved.`);
 		} catch (e) {
 			ctx.throw(500, e);
+			logger.error(`${itemName} 평균판매가 저장 실패 (500) ${e}`);
 		}
 	} else {
 		ctx.body = "Already exist.";
+		logger.info(`${itemName} already exist.`);
 	}
 };
 
@@ -85,10 +98,12 @@ const avgList = async ctx => {
 
 const dbSync = async ctx => {
 	const sync_date = ctx.params.id;
+	logger.info(`${sync_date} DB 동기화 요청`);
 	const itemList = ctx.request.body.list;
 	if (itemList == undefined) {
 		ctx.status = 400;
 		ctx.body = "No data received.";
+		logger.error(`${sync_date} 데이터 누락`);
 	}
 
 	try {
@@ -101,6 +116,7 @@ const dbSync = async ctx => {
 			if (result.error) {
 				ctx.status = 400; // Bad request
 				ctx.body = result.error;
+				logger.error(`${sync_date} DB 동기화 데이터 검증 오류 (400)`);
 				return;
 			}
 
@@ -114,6 +130,7 @@ const dbSync = async ctx => {
 		}
 		ctx.status = 201;
 		ctx.body = "Saved";
+		logger.info(`${sync_date} DB 동기화 완료`);
 	} catch (e) {
 		ctx.throw(500, e);
 	}
@@ -126,6 +143,7 @@ const dbSync = async ctx => {
 			$set: { content: sync_date },
 		}
 	);
+	logger.info(`DB 동기화 날짜 최신화 완료`);
 };
 
 auc.get("/", freqSearch);
