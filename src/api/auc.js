@@ -97,7 +97,7 @@ const avgList = async ctx => {
 };
 
 const dbSync = async ctx => {
-	const sync_date = ctx.params.id;
+	const sync_date = ctx.params.date;
 	logger.info(`${sync_date} DB 동기화 요청`);
 	const itemList = ctx.request.body.list;
 	if (itemList == undefined) {
@@ -149,6 +149,6 @@ const dbSync = async ctx => {
 auc.get("/", freqSearch);
 auc.post("/:id", avgSave);
 auc.get("/:id", avgList);
-auc.put("/:id", dbSync);
+auc.put("/:date", dbSync);
 
 export default auc;
