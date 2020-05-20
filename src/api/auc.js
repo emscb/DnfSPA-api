@@ -21,8 +21,17 @@ const schema = Joi.object().keys({
 
 const freqSearch = async ctx => {
 	logger.info("최빈 검색 아이템 조회");
+	const date = new Date();
+	let day_ago;
+	date.setDate(date.getDate() - 7);
+	day_ago = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 	try {
 		const items = await Auc.aggregate([
+			{
+				$match: {
+					date: { $gte: new Date(day_ago) },
+				},
+			},
 			{
 				$group: {
 					_id: { name: "$itemName", id: "$itemId" },
