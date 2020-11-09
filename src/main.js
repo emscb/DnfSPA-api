@@ -18,7 +18,7 @@ Mongoose.connect(MONGO_URI, { useNewUrlParser: true, useFindAndModify: false })
 const app = new Koa();
 const router = new Router();
 
-app.use(cors());
+app.use(cors({ origin: "https://emscb.github.io", credentials: true }));
 
 // 라우터 설정
 router.use("/api", api.routes());
